@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block extra_css %}
+<style>
+    .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 1.5rem; background: var(--surface); border-radius: 10px; box-shadow: var(--shadow); }
+    .welcome { background: var(--surface); padding: 2rem; border-radius: 10px; box-shadow: var(--shadow); margin-bottom: 2rem; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+    .info-card { background: var(--surface); padding: 1.5rem; border-radius: 10px; box-shadow: var(--shadow); border-left: 4px solid var(--primary); }
+    .info-card h3 { color: var(--text-secondary); font-size: 0.875rem; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .info-card p { font-size: 1.25rem; font-weight: 600; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="dashboard-header">
+    <h2>👋 Welcome, <span id="userName">User</span></h2>
+    <button onclick="logout()" class="btn btn-secondary">Logout</button>
+</div>
+<div class="welcome">
+    <h3>Your Dashboard</h3>
+    <p style="color: var(--text-secondary);">You're logged in as a standard user.</p>
+</div>
+<div class="info-grid">
+    <div class="info-card"><h3>Username</h3><p id="profileUsername">Loading...</p></div>
+    <div class="info-card"><h3>Email</h3><p id="profileEmail">Loading...</p></div>
+    <div class="info-card"><h3>Role</h3><p id="profileRole">User</p></div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    if (!isAuthenticated()) { window.location.href = '/login'; }
+    if (getUserRole() === 'Admin') { window.location.href = '/admin'; }
+    document.getElementById('userName').textContent = localStorage.getItem('username') || 'User';
+    
+    fetch('/api/profile', { headers: { 'Authorization': `Bearer ${getToken()}` } })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('profileUsername').textContent = data.username;
+            document.getElementById('profileEmail').textContent = data.email;
+            document.getElementById('profileRole').textContent = data.role;
+        });
+</script>
+{% endblock %}

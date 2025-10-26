@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Secure Login System{% endblock %}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #2563eb; --primary-hover: #1d4ed8; --success: #10b981;
+            --error: #ef4444; --warning: #f59e0b; --bg: #f9fafb;
+            --surface: #ffffff; --text: #111827; --text-secondary: #6b7280;
+            --border: #e5e7eb; --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        .navbar { background: var(--surface); padding: 1rem 2rem; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { color: var(--primary); font-size: 1.5rem; }
+        .navbar a { margin-left: 1.5rem; text-decoration: none; color: var(--text); font-weight: 500; transition: color 0.3s; }
+        .navbar a:hover { color: var(--primary); }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none; }
+        .alert.show { display: block; }
+        .alert-success { background: #d1fae5; color: #065f46; border-left: 4px solid var(--success); }
+        .alert-error { background: #fee2e2; color: #991b1b; border-left: 4px solid var(--error); }
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: var(--shadow); }
+        .btn-secondary { background: var(--text-secondary); color: white; }
+        .btn-danger { background: var(--error); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.875rem; }
+        footer { text-align: center; padding: 2rem; color: var(--text-secondary); margin-top: 3rem; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🔒 Secure Login System</h1>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+        </div>
+    </nav>
+    <div class="container">
+        <div id="alertBox" class="alert"></div>
+        {% block content %}{% endblock %}
+    </div>
+    <footer><p>&copy; 2025 Secure Login System | Internship Project</p></footer>
+    <script>
+        function showAlert(message, type = 'success') {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type} show`;
+            setTimeout(() => { alertBox.className = 'alert'; }, 5000);
+        }
+        function getToken() { return localStorage.getItem('access_token'); }
+        function setToken(token) { localStorage.setItem('access_token', token); }
+        function removeToken() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('user_role');
+            localStorage.removeItem('username');
+        }
+        function isAuthenticated() { return !!getToken(); }
+        function getUserRole() { return localStorage.getItem('user_role'); }
+        function logout() {
+            removeToken();
+            showAlert('Logged out successfully', 'success');
+            setTimeout(() => { window.location.href = '/login'; }, 1000);
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

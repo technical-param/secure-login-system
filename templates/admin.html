@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: var(--surface);
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+    }
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: var(--surface);
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+        border-left: 4px solid var(--primary);
+    }
+    .stat-card h3 {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+    .stat-card .value {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .users-table {
+        background: var(--surface);
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+        overflow-x: auto;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th {
+        background: var(--bg);
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 2px solid var(--border);
+    }
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+    tr:hover {
+        background: var(--bg);
+    }
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .badge-admin {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    .badge-user {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    .badge-locked {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    .badge-active {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    .actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h2>🔐 Admin Dashboard - <span id="userName">Admin</span></h2>
+    <button onclick="logout()" class="btn btn-secondary">Logout</button>
+</div>
+
+<div class="stats">
+    <div class="stat-card">
+        <h3>Total Users</h3>
+        <div class="value" id="totalUsers">0</div>
+    </div>
+    <div class="stat-card">
+        <h3>Active Users</h3>
+        <div class="value" id="activeUsers">0</div>
+    </div>
+    <div class="stat-card">
+        <h3>Locked Accounts</h3>
+        <div class="value" id="lockedUsers">0</div>
+    </div>
+</div>
+
+<div class="users-table">
+    <h3>👥 User Management</h3>
+    <div id="loading">Loading users...</div>
+    <div id="tableContainer" style="display: none;">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Failed</th>
+                    <th>Last Login</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            if (!isAuthenticated() || getUserRole() !== 'Admin') {
+                window.location.href = '/login';
+                return;
+            }
+
+            const username = localStorage.getItem('username') || 'Admin';
+            document.getElementById('userName').textContent = username;
+
+            function loadUsers() {
+                fetch('/api/admin/users', {
+                    headers: {
+                        'Authorization': 'Bearer ' + getToken()
+                    }
+                })
+                .then(response => {
+                    if (response.status === 401 || response.status === 422) {
+                        removeToken();
+                        window.location.href = '/login';
+                        return;
+                    }
+                    return response.json();
+                })
+                .then(users => {
+                    if (!users) return;
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('tableContainer').style.display = 'block';
+
+                    const tbody = document.getElementById('usersTableBody');
+                    tbody.innerHTML = '';
+
+                    users.forEach(user => {
+                        const lastLogin = user.last_login ? new Date(user.last_login).toLocaleString() : 'Never';
+                        let actions = '';
+                        if (user.is_locked) {
+                            actions += '<button onclick="unlockUser(' + user.id + ')" class="btn btn-success btn-sm">Unlock</button>';
+                        }
+                        if (user.role !== 'Admin') {
+                            actions += '<button onclick="changeRole(' + user.id + ', \'Admin\')" class="btn btn-primary btn-sm">Make Admin</button>';
+                        }
+                        if (user.role === 'Admin' && user.email !== 'admin@example.com') {
+                            actions += '<button onclick="changeRole(' + user.id + ', \'User\')" class="btn btn-secondary btn-sm">Make User</button>';
+                        }
+                        if (user.email !== 'admin@example.com') {
+                            actions += '<button onclick="deleteUser(' + user.id + ', \'' + user.username + '\')" class="btn btn-danger btn-sm">Delete</button>';
+                        }
+                        const rowHtml = `
+                            <tr>
+                                <td>${user.id}</td>
+                                <td>${user.username}</td>
+                                <td>${user.email}</td>
+                                <td><span class="badge badge-${user.role.toLowerCase()}">${user.role}</span></td>
+                                <td><span class="badge badge-${user.is_locked ? 'locked' : 'active'}">${user.is_locked ? 'Locked' : 'Active'}</span></td>
+                                <td>${user.failed_attempts}</td>
+                                <td>${lastLogin}</td>
+                                <td class="actions">${actions}</td>
+                            </tr>
+                        `;
+                        tbody.insertAdjacentHTML('beforeend', rowHtml);
+                    });
+
+                    document.getElementById('totalUsers').textContent = users.length;
+                    document.getElementById('activeUsers').textContent = users.filter(u => !u.is_locked).length;
+                    document.getElementById('lockedUsers').textContent = users.filter(u => u.is_locked).length;
+                })
+                .catch(error => {
+                    document.getElementById('loading').textContent = 'Error loading users: ' + error.message;
+                });
+            }
+
+            window.unlockUser = function(userId) {
+                if (!confirm('Unlock this user?')) return;
+                fetch(`/api/admin/users/${userId}/unlock`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                })
+                .then(() => {
+                    showAlert('User unlocked', 'success');
+                    loadUsers();
+                });
+            };
+
+            window.deleteUser = function(userId, username) {
+                if (!confirm(`Delete user "${username}"? This cannot be undone.`)) return;
+                fetch(`/api/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                })
+                .then(() => {
+                    showAlert('User deleted', 'success');
+                    loadUsers();
+                });
+            };
+
+            window.changeRole = function(userId, newRole) {
+                if (!confirm(`Change role to ${newRole}?`)) return;
+                fetch(`/api/admin/users/${userId}/role`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + getToken(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ role: newRole })
+                })
+                .then(() => {
+                    showAlert('Role updated', 'success');
+                    loadUsers();
+                });
+            };
+
+            loadUsers();
+            setInterval(loadUsers, 30000);
+        }, 200);
+    });
+</script>
+{% endblock %}

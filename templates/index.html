@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Home - Secure Login System{% endblock %}
+{% block extra_css %}
+<style>
+    .hero { text-align: center; padding: 4rem 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; margin-bottom: 3rem; }
+    .hero h2 { font-size: 2.5rem; margin-bottom: 1rem; }
+    .hero p { font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.9; }
+    .hero .btn { margin: 0 0.5rem; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 3rem 0; }
+    .feature { background: var(--surface); padding: 2rem; border-radius: 10px; box-shadow: var(--shadow); text-align: center; transition: transform 0.3s; }
+    .feature:hover { transform: translateY(-5px); }
+    .feature-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .feature h3 { color: var(--primary); margin-bottom: 0.5rem; }
+    .feature p { color: var(--text-secondary); }
+</style>
+{% endblock %}
+{% block content %}
+<div class="hero">
+    <h2>🔐 Secure Login System</h2>
+    <p>Production-ready authentication with JWT & RBAC</p>
+    <a href="/register" class="btn btn-primary">Get Started</a>
+    <a href="/login" class="btn btn-secondary">Login</a>
+</div>
+<div class="features">
+    <div class="feature"><div class="feature-icon">🔑</div><h3>JWT Authentication</h3><p>Secure stateless authentication with 1-hour expiration</p></div>
+    <div class="feature"><div class="feature-icon">👥</div><h3>Role-Based Access Control</h3><p>Admin and User roles with granular permissions</p></div>
+    <div class="feature"><div class="feature-icon">🔒</div><h3>Argon2 Hashing</h3><p>Military-grade password security</p></div>
+    <div class="feature"><div class="feature-icon">🛡️</div><h3>Account Protection</h3><p>Automatic lockout after 5 failed attempts</p></div>
+    <div class="feature"><div class="feature-icon">⚡</div><h3>Rate Limiting</h3><p>Protection against brute-force attacks</p></div>
+    <div class="feature"><div class="feature-icon">📊</div><h3>Admin Dashboard</h3><p>Complete user management interface</p></div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    if (isAuthenticated()) {
+        const role = getUserRole();
+        window.location.href = role === 'Admin' ? '/admin' : '/dashboard';
+    }
+</script>
+{% endblock %}
