@@ -91,7 +91,7 @@ It offers:
 ### ⚙️ Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/secure-login-system.git
+git clone https://github.com/technical-param/secure-login-system.git
 cd secure-login-system
 ```
 
@@ -221,7 +221,7 @@ pip install -r requirements.txt
 ## 🧑‍💻 Author
 
 **Parmeshwar Ware**  
-_Cybersecurity Enthusiast_  
+_Cybersecurity Intern_  
 📧 [parmeshwar.ware@outlook.com](mailto:parmeshwar.ware@outlook.com)
 
 ---
