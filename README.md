@@ -42,7 +42,7 @@ It offers:
 | **Password Hashing** | Argon2 (`argon2-cffi`) |
 | **Database** | SQLite (lightweight, file-based) |
 | **Rate Limiting** | Flask-Limiter |
-| **CAPTCHA Verification** Pillow & captcha module for dynamic image-based CAPTCHA
+| **CAPTCHA Verification** | Pillow & Captcha module |
 | **CORS Handling** | Flask-CORS |
 | **Environment Variables** | python-dotenv |
 | **Frontend** | HTML (Jinja2 Templates) + Vanilla JavaScript (Fetch API) |
@@ -53,7 +53,7 @@ It offers:
 
 ✅ **User Registration** — Strong password validation and Argon2 hashing  
 ✅ **JWT Authentication** — Stateless and secure login flow  
-✅ **CAPTCHA Verification** on login page to block automated brute-force attempts  
+✅ **CAPTCHA Verification** — Block automated brute-force attempts  
 ✅ **Role-Based Access** — Separate Admin/User privileges  
 ✅ **Admin Dashboard** — Manage, delete, or unlock users  
 ✅ **Account Lockout** — Protects from brute-force attempts  
