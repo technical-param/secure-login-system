@@ -12,6 +12,7 @@ It offers:
 
 - Role-based access (Admin / User)
 - JWT-based stateless authentication
+- CAPTCHA verification feature
 - Secure password hashing (Argon2)
 - Account lockout after failed attempts
 - Admin dashboard for user management
@@ -28,6 +29,7 @@ It offers:
 - **Role-based Access:** Admin vs. User authorization
 - **Account Lockout:** 5 failed attempts lock account for 15 minutes
 - **Token Expiry:** JWT tokens expire in 1 hour (auto-refresh supported)
+- **CAPTCHA Verification** added using Pillow and captcha (SimpleCaptcha) libraries to prevent automated login attempts
 
 ---
 
@@ -40,6 +42,7 @@ It offers:
 | **Password Hashing** | Argon2 (`argon2-cffi`) |
 | **Database** | SQLite (lightweight, file-based) |
 | **Rate Limiting** | Flask-Limiter |
+| **CAPTCHA Verification** Pillow & captcha module for dynamic image-based CAPTCHA
 | **CORS Handling** | Flask-CORS |
 | **Environment Variables** | python-dotenv |
 | **Frontend** | HTML (Jinja2 Templates) + Vanilla JavaScript (Fetch API) |
@@ -50,6 +53,7 @@ It offers:
 
 ✅ **User Registration** — Strong password validation and Argon2 hashing  
 ✅ **JWT Authentication** — Stateless and secure login flow  
+✅ **CAPTCHA Verification** on login page to block automated brute-force attempts  
 ✅ **Role-Based Access** — Separate Admin/User privileges  
 ✅ **Admin Dashboard** — Manage, delete, or unlock users  
 ✅ **Account Lockout** — Protects from brute-force attempts  
@@ -171,7 +175,7 @@ Application runs at:
    Accepts username, email, and password → validates → stores hashed password.
 
 2. **Login API:**  
-   Issues JWT containing user role and username claims upon successful authentication.
+   Validates credentials, verifies CAPTCHA, and issues JWT token.
 
 3. **JWT Protected Routes:**  
    Use `@jwt_required()` decorator to ensure valid token in `Authorization` header.
@@ -184,6 +188,7 @@ Application runs at:
 
 6. **Security Controls:**  
    - Argon2 password hashing  
+   - CAPTCHA verification on login  
    - Account lockout on 5 failed logins  
    - 1-hour token expiry  
    - Rate-limited login attempts  
@@ -209,6 +214,8 @@ Flask-JWT-Extended==4.6.0
 Flask-Limiter==3.5.0
 argon2-cffi==23.1.0
 python-dotenv==1.0.0
+captcha==0.4
+Pillow==9.5.0
 ```
 
 Install via:
@@ -232,4 +239,3 @@ This project is open-source and available under the **MIT License**.
 
 ---
 
-> ⚡ *"Secure coding isn't just a skill — it's a mindset."*
