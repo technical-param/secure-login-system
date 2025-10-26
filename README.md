@@ -29,7 +29,7 @@ It offers:
 - **Role-based Access:** Admin vs. User authorization
 - **Account Lockout:** 5 failed attempts lock account for 15 minutes
 - **Token Expiry:** JWT tokens expire in 1 hour (auto-refresh supported)
-- **CAPTCHA Verification** added using Pillow and captcha (SimpleCaptcha) libraries to prevent automated login attempts
+- **CAPTCHA Verification:** added using Pillow and captcha (SimpleCaptcha) libraries to prevent automated login attempts
 
 ---
 
